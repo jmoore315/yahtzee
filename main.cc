@@ -21,24 +21,7 @@
 
 int main(int argc, char const *argv[])
 {	
-	srand(time(0));
-	/* code */
-
-	fprintf(stdout, "Welcome to Yatzee!\n\n");
-
-	//get input: n to start a new game, q to quit
-	bool new_game = false;
-
-	Die * die_1 = new Die();
-	die_1->roll();
-	int val = die_1->value;
-	fprintf(stdout, "%d\n", val);
-
-
-	fprintf(stdout, "Remaining slots:\n");
-	int num_options = 13;
-	
-	const char * options[num_options];	//list of play options
+	//initialization
 	const char * sixes = "Sixes\t";
 	const char * fives = "Fives\t";
 	const char * fours = "Fours\t";
@@ -53,6 +36,9 @@ int main(int argc, char const *argv[])
 	const char * small_straight = "Small Straight";
 	const char * large_straight = "Large Straight";
 	const char * chance = "Chance\t";
+	
+	int num_options = 13;
+	const char * options[num_options];	//list of play options
 	options[0] = aces;
 	options[1] = twos;
 	options[2] = threes;
@@ -67,13 +53,33 @@ int main(int argc, char const *argv[])
 	options[11] = yahtzee;
 	options[12] = chance;
 
+	bool new_game = false;
+	bool played_option[13];	//array element is True if option has been played
+
+
+
+	
+
+
+	fprintf(stdout, "Welcome to Yatzee!\n\n");
+
+	//get input: n to start a new game, q to quit
+	
+	/*
+	Die * die_1 = new Die();
+	die_1->roll();
+	int val = die_1->value;
+	fprintf(stdout, "%d\n", val);
+	*/
+
 //	fprintf(stdout, "%d\n", num_options);
 
 	//for(int i = 0; i<num_options; i++ ){
 //		fprintf(stdout, "%s\n", options[i]);
 //	}
 
-	bool played_option[13];
+	
+	/*
 	played_option[ACES] = 1;
 	played_option[TWOS] = 1;
 	played_option[YAHTZEE] = 1;
@@ -81,6 +87,7 @@ int main(int argc, char const *argv[])
 	played_option[THREE_OF_KIND] = 1;
 	played_option[SMALL_STRAIGHT] = 1;
 	played_option[CHANCE] = 1;
+	*/
 
 	for(int i = 0; i<num_options; i++){
 		fprintf(stdout, "%s\t\t", options[i]);
@@ -109,10 +116,6 @@ int main(int argc, char const *argv[])
 			//after 3rd roll, or user is done rolling, provide options for where to use that roll on the board
 		//print new board (after update)
 		//continue until out of spaces on board
-
-
-
-
 
 	return 0;
 }
