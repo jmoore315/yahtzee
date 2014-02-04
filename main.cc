@@ -4,31 +4,15 @@
 #include <stdio.h>
 #include <time.h>
 #include <cstring>
-
-#define ACES 0
-#define TWOS 1
-#define THREES 2
-#define FOURS 3
-#define FIVES 4
-#define SIXES 5
-#define THREE_OF_KIND 6
-#define FOUR_OF_KIND 7
-#define FULL_HOUSE 8
-#define SMALL_STRAIGHT 9
-#define LARGE_STRAIGHT 10
-#define YAHTZEE 11
-#define CHANCE 12
-#define NUM_OPTIONS 13
-
-#define BUFFER_LENGTH 30
+#include "preprocessor.h"
 
 void print_options(char * options[], bool played_option[]);
 char * get_input (char *s, size_t n);
 void clear_screen();
 void reset_game(bool played_option[], int * score);
 void print_game(char * options[], bool played_option[], int score);
-void get_eligible_plays(DiceSet * current_dice, char * options[], bool played_option[], bool eligible_plays[]);
-void print_available_options(char * options[], bool eligible_plays[]);
+void get_open_plays(DiceSet * current_dice, bool played_option[], bool * open_plays);
+void print_available_options(char * options[], bool open_plays[], int values[]);
 
 int main(int argc, char const *argv[])
 {	
@@ -191,10 +175,10 @@ int main(int argc, char const *argv[])
 				break;
 			}
 		}
-		printf("Where would you like to play this roll?\n");
-		bool eligible_plays[NUM_OPTIONS];
-		get_eligible_plays(current_dice, (char **) options, played_option, eligible_plays);
-		print_available_options((char **) options, eligible_plays);
+		printf("Where would you like to play this roll?\n\n");
+		bool open_plays[NUM_OPTIONS];
+		get_open_plays(current_dice, played_option, open_plays);
+		print_available_options((char **) options, open_plays, current_dice->play_values);
 
 
 		
@@ -244,11 +228,13 @@ void print_options(char * options[], bool played_option[]){
 	}
 }
 
-void print_available_options(char * options[], bool eligible_plays[]){
+void print_available_options(char * options[], bool open_plays[], int values[]){
 	printf("Available options:\n");
 	for(int i = 0; i<NUM_OPTIONS; i++){
-		if(eligible_plays[i])
-			printf("%s\n\n", options[i]);
+		if(open_plays[i]){
+			printf("%s\t\t", options[i]);
+			printf("%d points\n\n", values[i]);
+		}
 	}
 }
 
@@ -297,11 +283,11 @@ void print_game(char * options[], bool played_option[], int score){
 	printf("**********************************\n\n");
 }
 
-void get_eligible_plays(DiceSet * current_dice, char * options[], bool played_option[], bool eligible_plays[]){
+void get_open_plays(DiceSet * current_dice, bool played_option[], bool * open_plays){
+	bool * eligible_plays = current_dice->eligible_plays; 
 	for (int i = 0; i < NUM_OPTIONS; ++i)
 	{
-		eligible_plays[i] = !(played_option[i]);
-		//this should be refined further to actually check if a diceset is elibile for playing a particular option
+		open_plays[i] = !played_option[i] && eligible_plays[i];
 	}
 
 }

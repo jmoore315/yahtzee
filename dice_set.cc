@@ -1,4 +1,6 @@
 #include "dice_set.h"
+#include "preprocessor.h"
+#include "cstring"
 #include <stdio.h>
 
 DiceSet::DiceSet(int num_dice){
@@ -21,6 +23,7 @@ void DiceSet::roll_dice(){
 		if(dice[i].value == 0)
 			dice[i].roll();
 	}
+	get_eligible_plays();
 }
 
 void DiceSet::print_dice(){
@@ -32,6 +35,9 @@ void DiceSet::print_dice(){
 	for(int i = 0; i<num_dice; i++)
 		printf("|  %d  ", dice[i].value);
 	printf("\n\n");
+	if(eligible_plays[YAHTZEE]){
+		printf("\nCongrats, you got a yahtzee!\n\n");
+	}
 }
 
 void DiceSet::set_die(int n, int val){
@@ -40,6 +46,38 @@ void DiceSet::set_die(int n, int val){
 
 void DiceSet::deactivate_die(int n){
 	dice[n].value = 0;
+}
+
+void DiceSet::get_eligible_plays(){
+	memset(eligible_plays, 0, NUM_OPTIONS);
+
+	if(play_values[ACES] = aces())
+		eligible_plays[ACES] = true;
+	if(play_values[TWOS] = twos())
+		eligible_plays[TWOS] = true;
+	if(play_values[THREES] = threes())
+		eligible_plays[THREES] = true;
+	if(play_values[FOURS] = fours())
+		eligible_plays[FOURS] = true;
+	if(play_values[FIVES] = fives())
+		eligible_plays[FIVES] = true;
+	if(play_values[SIXES] = sixes())
+		eligible_plays[SIXES] = true;
+	if(play_values[THREE_OF_KIND] = three_of_kind())
+		eligible_plays[THREE_OF_KIND] = true;
+	if(play_values[FOUR_OF_KIND] = four_of_kind())
+		eligible_plays[FOUR_OF_KIND] = true;
+	if(play_values[YAHTZEE] = yahtzee())
+		eligible_plays[YAHTZEE] = true;
+	if(play_values[SMALL_STRAIGHT] = small_straight())
+		eligible_plays[SMALL_STRAIGHT] = true;
+	if(play_values[LARGE_STRAIGHT] = large_straight())
+		eligible_plays[LARGE_STRAIGHT] = true;
+	if(play_values[FULL_HOUSE] = full_house())
+		eligible_plays[FULL_HOUSE] = true;
+	play_values[CHANCE] = sum_dice();
+	eligible_plays[CHANCE] = true;
+
 }
 
 int DiceSet::value_of(int n){
@@ -81,6 +119,8 @@ int DiceSet::three_of_kind(){
 	int count = 0;
 	for (int i = 0; i < 3; i++){
 		int value = dice[i].value;
+		if (value == 0)
+			continue;
 		count = 1;
 		for(int j = i+1; j<num_dice; j++){
 			if (dice[j].value == value){
@@ -97,6 +137,8 @@ int DiceSet::four_of_kind(){
 	int count = 0;
 	for (int i = 0; i < 2; i++){
 		int value = dice[i].value;
+		if(value == 0)
+			continue;
 		count = 1;
 		for(int j = i+1; j<num_dice; j++){
 			if (dice[j].value == value){
@@ -111,6 +153,8 @@ int DiceSet::four_of_kind(){
 int DiceSet::yahtzee(){
 	int count = 1;
 	int value = dice[0].value;
+	if(value==0)
+		return 0;
 	for(int i = 1; i<num_dice; i++){
 		if (dice[i].value == value){
 			count++;
@@ -122,21 +166,35 @@ int DiceSet::yahtzee(){
 }
 
 int DiceSet::full_house(){
-	int three_num = three_of_kind()/3;	//0 if set does not include a 3 of a kind
-	if (three_num){
-		int two_num = 0;
+	if (eligible_plays[THREE_OF_KIND]){
+		int val1 = 0;
+		int count1 = 0;
+		int val2 = 0;
+		int count2 = 0;
 		for(int i = 0; i < num_dice; i++){
-			if(dice[i].value != three_num){
-				if(!two_num)
-					two_num = dice[i].value;
-				else if (two_num != dice[i].value){
-					//no pair present. return 0
-					return 0;
-				}
+			int current_val = dice[i].value;
+			if(current_val == 0)
+				return false;
+			if(!val1){
+				val1 = current_val;
+				count1++;
 			}
+			else if (current_val == val1){
+				count1++;
+			}
+			else if (!val2){
+				val2 = current_val;
+				count2++;
+			}
+			else if (current_val == val2){
+				count2++;
+			}
+			else
+				return 0;
 		}
+		if (((count1 == 2) && (count2 == 3)) || ((count1 == 3) && (count2 == 2)))
+			return 25;
 	}
-	return 25;
 }
 
 int DiceSet::small_straight(){
