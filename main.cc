@@ -5,6 +5,7 @@
 #include <time.h>
 #include <cstring>
 #include "preprocessor.h"
+#include <ctype.h>
 
 void print_options(char * options[], bool played_option[]);
 char * get_input (char *s, size_t n);
@@ -13,6 +14,8 @@ void reset_game(bool played_option[], int * score);
 void print_game(char * options[], bool played_option[], int score);
 void get_open_plays(DiceSet * current_dice, bool played_option[], bool * open_plays);
 void print_available_options(char * options[], bool open_plays[], int values[]);
+int count_open_plays(bool open_plays[]);
+bool is_number(char *s, int len);
 
 int main(int argc, char const *argv[])
 {	
@@ -175,10 +178,40 @@ int main(int argc, char const *argv[])
 				break;
 			}
 		}
-		printf("Where would you like to play this roll?\n\n");
+
+		//User selects which option to play with the roll
 		bool open_plays[NUM_OPTIONS];
 		get_open_plays(current_dice, played_option, open_plays);
-		print_available_options((char **) options, open_plays, current_dice->play_values);
+		int open_plays_count = count_open_plays(open_plays);
+		int play;
+		if(open_plays_count > 0){
+			print_available_options((char **) options, open_plays, current_dice->play_values);
+			printf("Where would you like to play this roll? Enter the number of the option.\n\n");
+			bad_input = true;
+			while(bad_input){
+				get_input(input, BUFFER_LENGTH);
+				input_length = strlen(input);
+				if((input_length != 2 && input_length != 1) || !is_number(input, input_length)) {
+					printf("Bad input. Please enter the number of the option you'd like to play.\n");
+				}
+				else{
+					play = atoi(input);
+					//check to make sure input number is valid
+					if(play >= 1 && play <= open_plays_count){
+						printf("You selected option %d\n", play); 
+						bad_input = false;
+					}
+					else{
+						printf("Bad input. Please enter the number of the option you'd like to play.\n");
+					}
+				}
+			}	
+		}
+		else{
+			printf("There are no available plays for your roll...sorry!\n\n");
+		}
+		
+
 
 
 		
@@ -230,12 +263,24 @@ void print_options(char * options[], bool played_option[]){
 
 void print_available_options(char * options[], bool open_plays[], int values[]){
 	printf("Available options:\n");
+	int count = 1;
 	for(int i = 0; i<NUM_OPTIONS; i++){
 		if(open_plays[i]){
+			printf("%d)\t", count);
 			printf("%s\t\t", options[i]);
 			printf("%d points\n\n", values[i]);
+			count++;
 		}
 	}
+}
+
+int count_open_plays(bool open_plays[]){
+	int count = 0;
+	for(int i = 0; i<NUM_OPTIONS; i++){
+		if(open_plays[i])
+			count++;
+	}
+	return count;
 }
 
 char * get_input (char *s, size_t n){
@@ -290,4 +335,12 @@ void get_open_plays(DiceSet * current_dice, bool played_option[], bool * open_pl
 		open_plays[i] = !played_option[i] && eligible_plays[i];
 	}
 
+}
+
+bool is_number(char *s, int len){
+	for (int i = 0; i<len; i++){
+		if(!isdigit(s[i]))
+			return false;
+	}
+	return true;
 }
